@@ -112,18 +112,6 @@ $app->get("/cart/:idproduct/minus", function($idproduct){
 	exit;
 });
 
-$app->get("/cart/:idproduct/remove", function($idproduct){
 
-	$product = new Product();
-
-	$product->get((int)$idproduct);
-
-	$cart = Cart::getFromSession();
-
-	$cart->removeProduct($product, true);
-
-	header("Location: /cart");
-	exit;
-});
 
 ?>
