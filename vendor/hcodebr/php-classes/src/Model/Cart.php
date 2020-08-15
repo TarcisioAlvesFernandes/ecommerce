@@ -141,6 +141,8 @@ class Cart extends Model {
             ]);              
         }
 
+        $this->getCalculateTotal();
+
     }
 
 
@@ -227,18 +229,22 @@ class Cart extends Model {
                 Cart::setMsgError($result->MsgErro);                
             }else {
                 Cart::clearMsgError();
-
-                $this->setnrdays($result->PrazoEntrega);
-                $this->setvlfreight($this->formatValueToDecimal($result->Valor));
-                $this->setdeszipcode($nrzipcode);
-
-                $this->save();
             }           
+            
+            $this->setnrdays($result->PrazoEntrega);
+            $this->setvlfreight($this->formatValueToDecimal($result->Valor));
+            $this->setdeszipcode($nrzipcode);
+
+            $this->save();
 
             return $result;
 
         }else {
+            $this->setnrdays(0);
+            $this->setvlfreight(0);
+            $this->setdeszipcode($nrzipcode);
 
+            $this->save();
         }
 
     }
