@@ -48,7 +48,7 @@ $app->get('/admin/logout', function (){
 
 
 
-
+//Esqueceu a senha
 
 $app->get("/admin/forgot", function(){
 

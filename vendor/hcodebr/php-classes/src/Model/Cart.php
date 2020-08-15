@@ -226,7 +226,7 @@ class Cart extends Model {
             $result = $xml->Servicos->cServico;
 
             if ($result->MsgErro != '') {
-                Cart::setMsgError($result->MsgErro);                
+                Cart::setMsgError((string)$result->MsgErro);                
             }else {
                 Cart::clearMsgError();
             }           

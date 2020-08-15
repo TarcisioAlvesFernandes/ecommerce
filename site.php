@@ -225,21 +225,105 @@ $app->post("/register", function(){
 
 	$user = new User();
 
-		$user->setData([
-			"inadmin"=>0,
-			"deslogin"=>$_POST['email'],
-			"desperson"=>$_POST['name'],
-			"desemail"=>$_POST['email'],
-			"despassword"=>$_POST['password'],
-			"nrphone"=>$_POST['phone']		
-		]);
+	$user->setData([
+		"inadmin"=>0,
+		"deslogin"=>$_POST['email'],
+		"desperson"=>$_POST['name'],
+		"desemail"=>$_POST['email'],
+		"despassword"=>$_POST['password'],
+		"nrphone"=>$_POST['phone']		
+	]);
+
+	$user->save();
+
+	User::login($_POST['email'], $_POST['password']);
+
+	$_SESSION["registerValues"] = ['name'=>'', 'email'=>'', 'phone'=>''];
+
+	header("Location: /checkout");
+	exit;
+
+});
+
+
+
+//Esqueceu a senha
+
+$app->get("/forgot", function(){
+
+	$page = new Page();
 	
-		$user->save();
-	
-		User::login($_POST['email'], $_POST['password']);
-	
-		header("Location: /checkout");
+	$page->setTpl('forgot', [
+		'errorRegister'=>User::getErrorRegister()
+	]);
+
+});
+
+$app->post("/forgot", function(){
+
+	if(!isset($_POST['email']) || $_POST['email'] == ''){
+		User::setErrorRegister("Favor digitar um endereço de e-mail válido.");
+		header("Location: /forgot");
 		exit;
+	}
+
+	if(User::checkLoginExist($_POST['email']) === false){
+		User::setErrorRegister("Este endereço de e-mail não existe na nossa base de dados.");
+		header("Location: /forgot");
+		exit;
+	}
+		
+	$user = User::getForgot($_POST["email"], false);
+
+	header("Location: /forgot/sent");
+	exit;
+
+});
+
+$app->get("/forgot/sent", function(){
+
+	$page = new Page();
+	
+	$page->setTpl('forgot-sent');
+
+});
+
+
+$app->get("/forgot/reset", function(){
+
+	$user = User::valideForgotDecrypt($_GET["code"]);
+
+	$page = new Page();
+	
+	$page->setTpl('forgot-reset', array(
+		"name"=>$user["desperson"],
+		"code"=>$_GET["code"]
+	));
+
+});
+
+$app->post("/forgot/reset", function(){
+
+	$forgot = User::valideForgotDecrypt($_POST["code"]);
+
+	User::setForgotUsed($forgot["idrecovery"]);
+
+	$user = new User();
+
+	$user->get((int)$forgot["iduser"]);
+
+	$password = password_hash($_POST["password"], PASSWORD_DEFAULT, [
+		"cost"=>12
+	]);
+
+	$user->setPassword($password);
+	
+
+
+	$page = new Page();
+
+	$page->setTpl('forgot-reset-success');	
+
 
 });
 
