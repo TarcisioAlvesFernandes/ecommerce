@@ -142,7 +142,7 @@ $app->post("/cart/freight", function(){
 
 $app->get("/checkout", function(){
 
-	User::verifyLogin(false);
+	User::verifyLogin(false, 'checkout');
 
 	$cart = Cart::getFromSession();
 
@@ -179,7 +179,8 @@ $app->post("/login", function(){
 		User::setError($e->getMessage());
 	}	
 
-	header("Location: /checkout");
+
+	header("Location: /".$_SESSION[User::ROTA]);
 	exit;
 
 });
@@ -240,7 +241,7 @@ $app->post("/register", function(){
 
 	$_SESSION["registerValues"] = ['name'=>'', 'email'=>'', 'phone'=>''];
 
-	header("Location: /checkout");
+	header("Location: /".$_SESSION[User::ROTA]);
 	exit;
 
 });
@@ -317,13 +318,68 @@ $app->post("/forgot/reset", function(){
 	]);
 
 	$user->setPassword($password);
-	
-
 
 	$page = new Page();
 
 	$page->setTpl('forgot-reset-success');	
 
+});
+
+$app->get("/profile", function(){
+
+	User::verifyLogin(false, 'profile');
+
+	$user = User::getFromSession();
+
+	$user->get($user->getiduser());
+
+	$page = new Page();
+
+	$page->setTpl("profile", [
+		"user"=>$user->getValues(),
+		"profileMsg"=>User::getSuccess(),
+		"profileError"=>User::getError()
+	]);
+
+});
+
+$app->post("/profile", function(){
+
+	User::verifyLogin(false, 'profile');
+	
+	$user = User::getFromSession();
+
+	if (!isset($_POST['desperson']) || $_POST['desperson'] == ''){
+		User::setError("Preencha o seu nome.");
+		header("Location: /profile");
+		exit;
+	}
+	if (!isset($_POST['desemail']) || $_POST['desemail'] == ''){
+		User::setError("Preencha o seu e-mail.");
+		header("Location: /profile");
+		exit;
+	}
+
+	if($_POST['desemail'] != $user->getdesemail()){
+		if(User::checkLoginExist($_POST['desemail']) == true){			
+			User::setError("Este endereço de e-mail já está cadastrado.");
+			header("Location: /profile");
+			exit;
+		}
+	}	
+
+	$_POST['inadmin'] = $user->getinadmin();		
+	$_POST['despassword'] = $user->getdespassword();
+	$_POST['deslogin'] = $_POST['desemail'];
+
+	$user->setData($_POST);
+
+	$user->update();
+
+	User::setSuccess("Dados gravados com Sucesso.");
+
+	header("Location: /". $_SESSION[User::ROTA]);
+	exit;
 
 });
 

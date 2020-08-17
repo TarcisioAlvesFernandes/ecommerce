@@ -13,6 +13,7 @@ class User extends Model {
 	const ERROR = "UserError";
 	const ERROR_REGISTER = "UserErrorRegister";
     const SUCCESS = "UserSucesss";
+    const ROTA = "Rota";
     
     public static function getFromSession(){
 
@@ -82,15 +83,17 @@ class User extends Model {
 
     }
 
-    public static function verifyLogin($inadmin = true){
+    public static function verifyLogin($inadmin = true, $rota = 'profile'){
         
         if (!User::checkLogin($inadmin)){
+            
+            $_SESSION[User::ROTA] = $rota;
 
             if($inadmin){
                 header("Location: /admin/login");    
             }else{
                 header("Location: /login");    
-            }
+            }                        
             exit;
 
         }
@@ -166,7 +169,7 @@ class User extends Model {
             ":iduser"=>$this->getiduser(),
             ":desperson"=>utf8_decode($this->getdesperson()),
             ":deslogin"=>$this->getdeslogin(),
-            ":despassword"=>User::getPasswordHash($this->getdespassword()),
+            ":despassword"=>$this->getdespassword(),
             ":desemail"=>$this->getdesemail(),
             ":nrphone"=>$this->getnrphone(),
             ":inadmin"=>$this->getinadmin()
@@ -308,6 +311,31 @@ class User extends Model {
 	{
 
 		$_SESSION[User::ERROR] = NULL;
+
+    }
+    
+    public static function setSuccess($msg)
+	{
+
+		$_SESSION[User::SUCCESS] = $msg;
+
+	}
+
+	public static function getSuccess()
+	{
+
+		$msg = (isset($_SESSION[User::SUCCESS]) && $_SESSION[User::SUCCESS]) ? $_SESSION[User::SUCCESS] : '';
+
+		User::clearSuccess();
+
+		return $msg;
+
+	}
+
+	public static function clearSuccess()
+	{
+
+		$_SESSION[User::SUCCESS] = NULL;
 
 	}
 
