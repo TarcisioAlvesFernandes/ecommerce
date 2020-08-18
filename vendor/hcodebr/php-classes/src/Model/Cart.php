@@ -16,8 +16,7 @@ class Cart extends Model {
 
         $cart = new Cart();
 
-        if(isset($_SESSION[Cart::SESSION]) && (int)$_SESSION[Cart::SESSION]["idcart"] > 0){
-            
+        if(isset($_SESSION[Cart::SESSION]) && (int)$_SESSION[Cart::SESSION]["idcart"] > 0){            
             $cart->get((int)$_SESSION[Cart::SESSION]["idcart"]);
         } else {
             
@@ -99,6 +98,11 @@ class Cart extends Model {
         ]);
 
         $this->setData($results[0]);
+    }
+
+    public function unlinkCart(){        
+
+        $_SESSION[Cart::SESSION] = NULL;
     }
 
 
