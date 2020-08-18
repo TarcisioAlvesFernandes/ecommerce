@@ -85,13 +85,13 @@ class User extends Model {
 
     public static function verifyLogin($inadmin = true, $rota = 'profile'){
         
-        if (!User::checkLogin($inadmin)){
-            
-            $_SESSION[User::ROTA] = $rota;
+        if (!User::checkLogin($inadmin)){                    
 
             if($inadmin){
+                $_SESSION[User::ROTA] = NULL;
                 header("Location: /admin/login");    
             }else{
+                $_SESSION[User::ROTA] = $rota;
                 header("Location: /login");    
             }                        
             exit;
